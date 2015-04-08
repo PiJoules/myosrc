@@ -1,0 +1,15 @@
+<html>
+    <body>
+        <p>Well, hello there{% if user %}{{ user }}{% endif %}!</p>
+        {% if not user %}
+        <p>
+            We're going to now talk to the GitHub API. Ready?
+            <a href="/login">Click here</a> to begin!</a>
+        </p>
+        {% else %}
+        <p>
+            <a href="/osrc">Stuff</a>
+        </p>
+        {% endif %}
+    </body>
+</html>
