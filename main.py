@@ -150,6 +150,7 @@ def osrc():
         latest_repo_contributions=osrc_raw["latest_repo_contributions"][:5],
         event_verbs=event_verbs,
         unique_events=osrc_raw["unique_events"].keys(),
+        unique_events_obj=osrc_raw["unique_events"],
         events_vector=osrc_raw["events_vector"],
         weekly_unique_events=osrc_raw["weekly_unique_events"],
         hourly_unique_events=osrc_raw["hourly_unique_events"],

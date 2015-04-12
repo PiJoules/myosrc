@@ -95,6 +95,30 @@
                 </div>
             </p>
 
+            {% if unique_events|length > 1 %}
+                <p id="events" class="osrc-ify">
+                    We already know that {{ first_name }}
+                    {% if most_done_event in event_actions %}
+                        loves {{ event_actions[most_done_event] }} whenever they're not pushing code
+                    {% else %}
+                        loves pushing code
+                    {% endif %}
+                    but the following chart sheds some light onto what {{ first_name }}
+                    does with their open source time. In the full event stream analyzed for
+                    this report, there are a total of <strong>{{ events|length }}</strong> events recorded for
+                    {{ first_name }}.
+
+                    The colors in the pie chart below indicate the number of events that are
+                    {% for event in unique_events %}
+                        {% if loop.last %} and{% endif %}
+                        <span class="evttype" data-ind="{{ loop.index0 }}">{{ event_verbs[event] }}</span>{% if not loop.last %},{% endif %}
+                    {% endfor %}.
+                </p>
+                <div class="hist-block">
+                    <div id="event-chart"></div>
+                </div>
+            {% endif %}
+
             <pre id="osrcData">
                 {{ osrc_data }}
             </pre>
@@ -142,6 +166,16 @@
                         {% endfor %}
                     ];
                     d3.select("#day").datum(day_data).call(day_hist);
+
+                    // Languages.
+                    var event_pie = window.piechart().dim(200);
+                    var event_data = [
+                        {% for event in unique_events %}
+                            {{ unique_events_obj[event] }}
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ];
+                    d3.select("#event-chart").datum(event_data).call(event_pie);
                 });
             })();
         </script>
