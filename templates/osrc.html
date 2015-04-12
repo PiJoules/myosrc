@@ -128,6 +128,20 @@
                         {% endfor %}
                     ];
                     d3.select("#week").datum(week_data).call(week_hist);
+
+                    var day_hist = window.histogram().width(400).labels(["", "3am","","","6am","","","9am","","","noon","","","3pm","","","6pm","","","9pm","","","12am",""]);
+                    var day_data = [
+                        {% for hourly_event in hourly_unique_events %}
+                            [
+                                {% for event in unique_events %}
+                                    {{ hourly_event[event] }}
+                                    {% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            ]
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ];
+                    d3.select("#day").datum(day_data).call(day_hist);
                 });
             })();
         </script>

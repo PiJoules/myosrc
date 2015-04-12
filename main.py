@@ -152,6 +152,7 @@ def osrc():
         unique_events=osrc_raw["unique_events"].keys(),
         events_vector=osrc_raw["events_vector"],
         weekly_unique_events=osrc_raw["weekly_unique_events"],
+        hourly_unique_events=osrc_raw["hourly_unique_events"],
     )
 
 
@@ -227,8 +228,13 @@ def raw_osrc_data():
     events_hours_vector = [0]*24 # initialize list of zeros
     latest_repo_contributions = []
     recorded_repos = []
+
     unique_events = {} # unique events over past received events
-    weekly_unique_events = [{} for x in range(7)] # unique events over each week
+    # make sure each dict has each of the event types
+    for event in events:
+        unique_events[event["type"]] = 0
+    weekly_unique_events = [unique_events.copy() for i in range(7)] # unique events over each week
+    hourly_unique_events = [unique_events.copy() for i in range(24)] # unique events over each hour
     for event in events:
         date_string = event["created_at"]
         date_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ") # monday is first
@@ -248,17 +254,12 @@ def raw_osrc_data():
             url = "https://github.com/" + name
             latest_repo_contributions.append( (date_obj, name, url) )
 
-        if not event["type"] in unique_events:
-            unique_events[event["type"]] = 1
-        else:
-            unique_events[event["type"]] += 1
 
-        # make sure each dict has each of the event types
-        for i in range(len(weekly_unique_events)):
-            if not event["type"] in weekly_unique_events[i]:
-                weekly_unique_events[i][event["type"]] = 0
-
+        unique_events[event["type"]] += 1
         weekly_unique_events[actual_day][event["type"]] += 1
+        # start at 2am instead of 12am because the original javascript code starts at 2am for some reason
+        hourly_unique_events[(date_obj.hour+2) % 24][event["type"]] += 1
+
 
     norm = math.sqrt(sum([ v*v for v in events_vector ]))
     nomralized_events_vector = [ float(v)/norm for v in events_vector ]
@@ -269,6 +270,7 @@ def raw_osrc_data():
     osrc_data["events_hours_vector"] = events_hours_vector
     osrc_data["unique_events"] = unique_events
     osrc_data["weekly_unique_events"] = weekly_unique_events
+    osrc_data["hourly_unique_events"] = hourly_unique_events
 
     # sort and add latest_repo_contributions
     sorted(latest_repo_contributions, key=operator.itemgetter(0))

@@ -27,3 +27,17 @@
 .evttype {
     font-weight: 600;
 }
+
+line.axis {
+    stroke: #222;
+    stroke-width: 1px;
+}
+
+.hist-block {
+    text-align: center;
+}
+
+.hist {
+    display: inline-block;
+    margin: 10px 20px 0;
+}
