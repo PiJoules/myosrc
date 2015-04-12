@@ -7,6 +7,7 @@
         <title>Open Source Report Card</title>
         
         <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/static/css/normalize.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/osrc.css" />
     </head>
 
@@ -29,25 +30,69 @@
             </p>
 
             <p class="osrc-ify">
-                {{ user }} is {{ adjectives|random }}
+                {{ user }} is <a href="#languages">{{ adjectives|random }}
                 {% if used_languages|length > 0 %}
                     {% if most_used_language in language_list %}
                         {{ language_list[most_used_language] }}
                     {% else %}
                         {{ most_used_language }} coder
-                    {% endif %}
+                    {% endif %}</a>
                 {% else %}
-                    hacker
+                    hacker</a>
                 {% endif %}
                 who
+                <a href="#events">
                 {% if most_done_event in event_actions %}
                     spends a lot of time
                     {{ event_actions[most_done_event] }} between pushes.
                 {% else %}
                     loves pushing code.
                 {% endif %}
+                </a>
 
-                {{ first_name }} is {{ week_type }}
+                {{ first_name }} is <a href="#schedule">{{ week_type }} who works best
+                {% if best_time == 0 or best_time == 12 %}
+                    {{ best_time_description }}.
+                {% elif best_time < 12 %}
+                    {{ best_time_description }} (around {{ best_time }} am).
+                {% else %}
+                    {{ best_time_description }} (around {{ best_time-12 }} pm).
+                {% endif %}</a>
+            </p>
+
+            {% if latest_repo_contributions|length > 1 %}
+                <p class="osrc-ify">
+                These days, {{ first_name }} is most actively contributing to the repositories:
+                {% for contribution in latest_repo_contributions %}
+                    {% if loop.last %} and {% endif %}
+                    <a href="{{ contribution[2] }}" target="_blank">{{ contribution[1] }}</a>
+                    {% if not loop.last %},{% endif %}
+                {% endfor %}.
+                </p>
+            {% endif %}
+
+            <h3 class="text-center">Statistics</h3>
+
+            <hr>
+
+            <p class="osrc-ify">
+                The two following graphs show {{ first_name }}'s average weekly and daily
+                schedules. These charts give significant insight into {{ first_name }}'s
+                character as a developer.
+                {% if unique_events|length > 1 %}
+                    The colors in the charts indicate the fraction of events that are
+                    {% for event in unique_events %}
+                        {% if loop.last %} and{% endif %}
+                        <span class="evttype" data-ind="{{ loop.index0 }}">{{ event_verbs[event] }}</span>{% if not loop.last %},{% endif %}
+                    {% endfor %}.
+                {% endif %}
+            </p>
+
+            <p>
+                <div class="hist-block">
+                    <div id="week" class="hist"></div>
+                    <div id="day" class="hist"></div>
+                </div>
             </p>
 
             <pre id="osrcData">
@@ -57,5 +102,34 @@
 
         <script type="text/javascript" src="/static/js/jquery.min.js"></script>
         <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+
+        <script type="text/javascript" src="/static/js/d3.v3.min.js"></script>
+        <script type="text/javascript" src="/static/js/plot.js"></script>
+        <script type="text/javascript">
+            (function () {
+                "use strict";
+                $(function () {
+                    var cb = d3.scale.category10();
+                    $(".evttype").each(function () {
+                        var el = $(this);
+                        el.css("color", cb(+el.data("ind")));
+                    });
+                    // Schedule histograms.
+                    var week_hist = window.histogram().width(200).labels(["S","M","T","W","T","F","S"]);
+                    var week_data = [
+                        {% for weekly_event in weekly_unique_events %}
+                            [
+                                {% for event in unique_events %}
+                                    {{ weekly_event[event] }}
+                                    {% if not loop.last %}, {% endif %}
+                                {% endfor %}
+                            ]
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ];
+                    d3.select("#week").datum(week_data).call(week_hist);
+                });
+            })();
+        </script>
     </body>
 </html>
