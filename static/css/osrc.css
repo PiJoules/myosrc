@@ -1,0 +1,25 @@
+@import url(https://fonts.googleapis.com/css?family=Lato:100,300,400,700,900,300italic);
+
+
+.avatar-container {
+	width: 50px;
+	height: 50px;
+	line-height: 50px;
+	overflow: hidden;
+	border-radius: 10px;
+	border: 1px solid black;
+	display: inline-block;
+	margin-right: 10px;
+}
+
+.avatar-container img {
+	width: 100%;
+	height: 100%;
+}
+
+.osrc-ify {
+    font-family: "Lato", "Helvetica Neue", Helvetica, sans-serif;
+    font-size: 16pt;
+    line-height: 2;
+    color: #222;
+}

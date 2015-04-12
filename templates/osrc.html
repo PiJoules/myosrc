@@ -1,0 +1,61 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <title>Open Source Report Card</title>
+        
+        <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
+        <link rel="stylesheet" type="text/css" href="/static/css/osrc.css" />
+    </head>
+
+    <body>
+        {% include "header.html" %}
+
+        <div class="container">
+
+            <p>
+                <div class="media">
+                    <div class="media-left media-middle">
+                        <div class="avatar-container">
+                            <img class="media-object" src="{{ avatar }}" alt="Avatar">
+                        </div>
+                    </div>
+                    <div class="media-body">
+                        <h1 class="media-heading">{{ user }}</h1>
+                    </div>
+                </div>
+            </p>
+
+            <p class="osrc-ify">
+                {{ user }} is {{ adjectives|random }}
+                {% if used_languages|length > 0 %}
+                    {% if most_used_language in language_list %}
+                        {{ language_list[most_used_language] }}
+                    {% else %}
+                        {{ most_used_language }} coder
+                    {% endif %}
+                {% else %}
+                    hacker
+                {% endif %}
+                who
+                {% if most_done_event in event_actions %}
+                    spends a lot of time
+                    {{ event_actions[most_done_event] }} between pushes.
+                {% else %}
+                    loves pushing code.
+                {% endif %}
+
+                {{ first_name }} is {{ week_type }}
+            </p>
+
+            <pre id="osrcData">
+                {{ osrc_data }}
+            </pre>
+        </div>
+
+        <script type="text/javascript" src="/static/js/jquery.min.js"></script>
+        <script type="text/javascript" src="/static/js/bootstrap.min.js"></script>
+    </body>
+</html>
