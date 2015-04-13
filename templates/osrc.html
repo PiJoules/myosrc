@@ -119,9 +119,33 @@
                 </div>
             {% endif %}
 
-            <pre id="osrcData">
-                {{ osrc_data }}
-            </pre>
+            {% if sorted_cumulative_languages|length > 1 %}
+                <p id="languages" class="osrc-ify">
+                    {{ first_name }} has contributed to repositories in {{ sorted_cumulative_languages|length }}
+                    languages. In particular, {{ first_name }} seems to be a pretty serious
+                    <strong>{{ most_used_language }}</strong> expert
+
+                    {% if (sorted_cumulative_languages[0][1] - sorted_cumulative_languages[1][1])/sorted_cumulative_languages[0][1] < 0.5 %}
+                        with a surprisingly broad knowledge of <strong>{{ sorted_cumulative_languages[1][0] }}</strong> as well
+                    {% endif %}.
+
+                    The following chart shows the percentage of contributions {{ first_name }} made to
+                    repositories mainly written in
+                    {% for lang in sorted_cumulative_languages[:5] %}
+                        {% if loop.last %} and{% endif %}
+                        <span class="evttype" data-ind="{{ loop.index0 }}">{{ lang[0] }}</span>{% if not loop.last %},{% endif %}
+                    {% endfor %}.
+                </p>
+                <div class="hist-block">
+                    <div id="lang-chart"></div>
+                </div>
+            {% elif sorted_cumulative_languages|length > 0 %}
+                <p id="languages" class="osrc-ify">
+                    All of {{ first_name }}'s activity seems to be associated with repositories
+                    in <strong>{{ most_used_language }}</strong>. Maybe it's time to
+                    branch out a bit.
+                </p>
+            {% endif %}
         </div>
 
         <script type="text/javascript" src="/static/js/jquery.min.js"></script>
@@ -176,6 +200,17 @@
                         {% endfor %}
                     ];
                     d3.select("#event-chart").datum(event_data).call(event_pie);
+
+                    // Languages.
+                    var lang_pie = window.piechart().dim(200);
+                    var lang_data = [
+                        {% set sum = sorted_cumulative_languages[:5]|sum(attribute=1) %}
+                        {% for lang in sorted_cumulative_languages[:5] %}
+                            {{ (lang[1]*100/sum)|int }}
+                            {% if not loop.last %}, {% endif %}
+                        {% endfor %}
+                    ];
+                    d3.select("#lang-chart").datum(lang_data).call(lang_pie);
                 });
             })();
         </script>

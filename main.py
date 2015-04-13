@@ -141,6 +141,7 @@ def osrc():
         adjectives=adjectives,
         language_list=language_list,
         used_languages=used_languages,
+        sorted_cumulative_languages=osrc_raw["sorted_cumulative_languages"],
         most_used_language=most_used_language,
         event_actions=event_actions,
         most_done_event=most_done_event,
@@ -217,6 +218,7 @@ def raw_osrc_data():
     osrc_data["repos"] = repos
     osrc_data["all_languages"] = all_languages
     osrc_data["cumulative_languages"] = cumulative_languages
+    osrc_data["sorted_cumulative_languages"] = sorted(cumulative_languages.items(), key=operator.itemgetter(1), reverse=True)
 
     # events
     eventsURL = trimHTTP(userInfo["events_url"])
