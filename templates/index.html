@@ -16,12 +16,14 @@
             <div class="jumbotron">
                 <h1>The Open Source Report Card</h1>
                 <p>Login to see a dynamically generated progress report for their open source contributions</p>
-                <p><a class="btn btn-primary btn-lg" href="/login" role="button">Login</a></p>
+                <p>
+                    {% if is_logged_in %}
+                        <a class="btn btn-primary btn-lg" href="/osrc" role="button">View my report card</a>
+                    {% else %}
+                        <a class="btn btn-primary btn-lg" href="/login" role="button">Login</a>
+                    {% endif %}
+                </p>
             </div>
-
-            <p>
-                Every day, many thousands of open source contributions are made on GitHub by developers around the world. This data is publicly available through the API and—even more conveniently—on the GitHub Archive. This is generally a pretty fun dataset to play with but it is particularly exciting for hackers because we get to play with data that describes our own behavior! Last year, shortly after the full event stream was publicly released, the first annual GitHub data challenge produced some sick data visualizations and it's clear that people at GitHub have been thinking about how to Use The Data For Good™.
-            </p>
         </div>
 
         <script type="text/javascript" src="/static/js/jquery.min.js"></script>

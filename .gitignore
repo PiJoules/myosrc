@@ -1,6 +1,7 @@
 *.pyc
 private/*
 lib/*
+sample\ images/
 
 !private/__init__.py
 !private/README.md
