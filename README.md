@@ -30,12 +30,7 @@ $ ./refresh_lib.sh
 
 
 ## Development
-1) After cloning this repo, start the mongodb server
-```sh
-$ sudo mongod
-```
-
-2) Start the GAE development server (in the root directory of the repo)
+1) Start the GAE development server (in the root directory of the repo)
 ```sh
 $ dev_appserver.py .
 ```
