@@ -27,7 +27,7 @@ class Secret:
 ```
 Replace `<session secret key>` the a randomly generated string of your choice, `<github client id>` with your app's client id, and `<github client secret>` with your app's client secret.
 
-5) Run the following script to create and pupulate a `lib/` directory which will contain all the python dependencies used in this app.
+5) Run the following script to create and populate a `lib/` directory which will contain all the python dependencies used in this app.
 ```sh
 $ ./refresh_lib.sh
 ```
