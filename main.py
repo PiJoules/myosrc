@@ -15,14 +15,11 @@ import json
 from datetime import datetime
 import operator
 import math
+import os
 
 from private.secret import Secret
 secret = Secret()
 app.secret_key = secret.session_secret
-
-# Create mongoconnection
-from private.mongoClientConnection import MongoClientConnection
-client = MongoClientConnection().connection.osrc
 
 from flask.ext.github import GitHub
 app.config['GITHUB_CLIENT_ID'] = secret.github_client_id
@@ -41,9 +38,6 @@ def login():
 @app.route('/logout')
 def logout():
     if "access_token" in session:
-        # remove the access token from DB
-        client.UserInfo.remove({"access_token": session["access_token"]})
-
         # delete the authentication
         requests.delete("https://api.github.com/applications/" + secret.github_client_id + "/tokens/" + session["access_token"], auth=HTTPBasicAuth(secret.github_client_id, secret.github_client_secret))
 
@@ -199,41 +193,15 @@ def raw_osrc_data():
     osrc_data = {}
 
     # check if user
-    if client.UserInfo.find({"access_token": session["access_token"]}).count() >= 1:
-        """
-        getting from github api:
-        user
-        user/repos
-        'languages for each repo'
-        'user events'
-        rate_limit (does not take up any requests)
-        """
-
-        document = client.UserInfo.find_one({"access_token": session["access_token"]})
-        
-        user_info = document["user_info"]
-        repos = document["repos"]
-        all_languages = document["all_languages"] # dict of languages for each repo where key is the repo name
-        events = document["events"]
-    else:
-        user_info = github.get("user")
-        repos = github.get("user/repos")
-        all_languages = {}
-        for repo in repos:
-            repo_name = repo["name"]
-            languages_url = repo["languages_url"]
-            languages = github.get(trimHTTP(languages_url))
-            all_languages[repo_name] = languages
-        events = github.get(trimHTTP(user_info["events_url"]), params={"per_page": 100}) # won't return more than 100 per page
-
-        # add the information to the DB
-        client.UserInfo.insert({
-            "access_token": session["access_token"],
-            "user_info": user_info,
-            "repos": repos,
-            "all_languages": all_languages,
-            "events": events
-        })
+    user_info = github.get("user")
+    repos = github.get("user/repos")
+    all_languages = {}
+    for repo in repos:
+        repo_name = repo["name"]
+        languages_url = repo["languages_url"]
+        languages = github.get(trimHTTP(languages_url))
+        all_languages[repo_name] = languages
+    events = github.get(trimHTTP(user_info["events_url"]), params={"per_page": 100}) # won't return more than 100 per page
 
     # user
     osrc_data["user"] = user_info
@@ -329,3 +297,9 @@ def raw_osrc_data():
 
 def is_logged_in():
     return "access_token" in session
+
+def is_on_appengine():
+    return os.getenv('SERVER_SOFTWARE') and os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')
+
+
+
