@@ -136,6 +136,7 @@ def osrc():
 
     return render_template("osrc.html",
         osrc_data=osrc_raw,
+        login=oscr_raw["login"],
         avatar=osrc_raw["user"]["avatar_url"],
         user=osrc_raw["name"],
         first_name=osrc_raw["first_name"],
@@ -300,6 +301,3 @@ def is_logged_in():
 
 def is_on_appengine():
     return os.getenv('SERVER_SOFTWARE') and os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')
-
-
-
