@@ -136,7 +136,6 @@ def osrc():
 
     return render_template("osrc.html",
         osrc_data=osrc_raw,
-        login=oscr_raw["login"],
         avatar=osrc_raw["user"]["avatar_url"],
         user=osrc_raw["name"],
         first_name=osrc_raw["first_name"],
