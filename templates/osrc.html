@@ -148,6 +148,11 @@
                     branch out a bit.
                 </p>
             {% endif %}
+            Below is {{ user }} github contribution chart.  You can see how active the {{ first_name }} is on github!
+              
+            <center>
+                <img src={{ github_chart }} alt="Name Your GitHub chart">
+            </center>    
         </div>
 
         <script type="text/javascript" src="/static/js/jquery.min.js"></script>
@@ -217,8 +222,6 @@
             })();
         </script>
         <!-- Prepare a container for your calendar. -->
-        <div>
-          <img src="http://ghchart.rshah.org/{{ login }}" alt="Name Your GitHub chart">
-        </div>
+        
     </body>
 </html>
