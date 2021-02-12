@@ -5,11 +5,13 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
 
         <title>Open Source Report Card</title>
-        
+
         <link rel="stylesheet" type="text/css" href="/static/css/bootstrap.min.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/normalize.css" />
         <link rel="stylesheet" type="text/css" href="/static/css/osrc.css" />
     </head>
+
+
 
     <body>
         {% include "header.html" %}
@@ -146,6 +148,12 @@
                     branch out a bit.
                 </p>
             {% endif %}
+            <p class="osrc-ify">
+               Below is {{ user }}'s Github contribution chart.  You can see how active {{ first_name }} is on <a href="https://github.com">Github</a>!
+            </p>
+            <center>
+                <img src={{ github_chart }} alt="Name Your GitHub chart">
+            </center>    
         </div>
 
         <script type="text/javascript" src="/static/js/jquery.min.js"></script>
@@ -214,5 +222,7 @@
                 });
             })();
         </script>
+        <!-- Prepare a container for your calendar. -->
+        
     </body>
 </html>

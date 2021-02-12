@@ -1,27 +1,28 @@
 """`main` is the top level module for your Flask application."""
 
 # Import the Flask Framework
+from flask.ext.github import GitHub
+from private.secret import Secret
+import logging
+import os
+import math
+import operator
+from datetime import datetime
+import json
+from requests.auth import HTTPBasicAuth
+import requests
+from google.appengine.api import urlfetch
 from flask import Flask, jsonify, render_template, request, url_for, flash, redirect, session, current_app
 app = Flask(__name__)
 # Note: We don't need to call run() since our application is embedded within
 # the App Engine WSGI application server.
 
-from google.appengine.api import urlfetch
 urlfetch.set_default_fetch_deadline(45)
 
-import requests
-from requests.auth import HTTPBasicAuth
-import json
-from datetime import datetime
-import operator
-import math
-import os
 
-from private.secret import Secret
 secret = Secret()
 app.secret_key = secret.session_secret
 
-from flask.ext.github import GitHub
 app.config['GITHUB_CLIENT_ID'] = secret.github_client_id
 app.config['GITHUB_CLIENT_SECRET'] = secret.github_client_secret
 github = GitHub(app)
@@ -31,18 +32,22 @@ github = GitHub(app)
 def index():
     return render_template("index.html", is_logged_in=is_logged_in())
 
+
 @app.route('/login')
 def login():
     return github.authorize()
+
 
 @app.route('/logout')
 def logout():
     if "access_token" in session:
         # delete the authentication
-        requests.delete("https://api.github.com/applications/" + secret.github_client_id + "/tokens/" + session["access_token"], auth=HTTPBasicAuth(secret.github_client_id, secret.github_client_secret))
+        requests.delete("https://api.github.com/applications/" + secret.github_client_id + "/tokens/" +
+                        session["access_token"], auth=HTTPBasicAuth(secret.github_client_id, secret.github_client_secret))
 
     session.clear()
     return redirect("/")
+
 
 @app.route('/callback')
 @github.authorized_handler
@@ -92,7 +97,8 @@ def osrc():
     # most used language
     used_languages = osrc_raw["cumulative_languages"].keys()
     if len(used_languages) > 0:
-        most_used_language = max(osrc_raw["cumulative_languages"].iteritems(), key=operator.itemgetter(1))[0]
+        most_used_language = max(
+            osrc_raw["cumulative_languages"].iteritems(), key=operator.itemgetter(1))[0]
     else:
         most_used_language = None
 
@@ -104,7 +110,8 @@ def osrc():
             events_counter[event["type"]] = 1
         else:
             events_counter[event["type"]] += 1
-    most_done_event = max(events_counter.iteritems(), key=operator.itemgetter(1))[0]
+    most_done_event = max(events_counter.iteritems(),
+                          key=operator.itemgetter(1))[0]
 
     best_dist = -1
     week_type = None
@@ -135,28 +142,29 @@ def osrc():
             break
 
     return render_template("osrc.html",
-        osrc_data=osrc_raw,
-        avatar=osrc_raw["user"]["avatar_url"],
-        user=osrc_raw["name"],
-        first_name=osrc_raw["first_name"],
-        adjectives=adjectives,
-        language_list=language_list,
-        used_languages=used_languages,
-        sorted_cumulative_languages=osrc_raw["sorted_cumulative_languages"],
-        most_used_language=most_used_language,
-        event_actions=event_actions,
-        most_done_event=most_done_event,
-        week_type=week_type,
-        best_time=best_time,
-        best_time_description=best_time_description,
-        latest_repo_contributions=osrc_raw["latest_repo_contributions"][:5],
-        event_verbs=event_verbs,
-        unique_events=osrc_raw["unique_events"].keys(),
-        unique_events_obj=osrc_raw["unique_events"],
-        events_vector=osrc_raw["events_vector"],
-        weekly_unique_events=osrc_raw["weekly_unique_events"],
-        hourly_unique_events=osrc_raw["hourly_unique_events"],
-    )
+                           osrc_data=osrc_raw,
+                           github_chart=osrc_raw["github_chart"],
+                           avatar=osrc_raw["user"]["avatar_url"],
+                           user=osrc_raw["name"],
+                           first_name=osrc_raw["first_name"],
+                           adjectives=adjectives,
+                           language_list=language_list,
+                           used_languages=used_languages,
+                           sorted_cumulative_languages=osrc_raw["sorted_cumulative_languages"],
+                           most_used_language=most_used_language,
+                           event_actions=event_actions,
+                           most_done_event=most_done_event,
+                           week_type=week_type,
+                           best_time=best_time,
+                           best_time_description=best_time_description,
+                           latest_repo_contributions=osrc_raw["latest_repo_contributions"][:5],
+                           event_verbs=event_verbs,
+                           unique_events=osrc_raw["unique_events"].keys(),
+                           unique_events_obj=osrc_raw["unique_events"],
+                           events_vector=osrc_raw["events_vector"],
+                           weekly_unique_events=osrc_raw["weekly_unique_events"],
+                           hourly_unique_events=osrc_raw["hourly_unique_events"],
+                           )
 
 
 # For displaying pretty json data
@@ -181,11 +189,12 @@ def application_error(e):
     """Return a custom 500 error."""
     return 'Sorry, unexpected error: {}'.format(e), 500
 
+
 def trimHTTP(url):
     if url.startswith("https://api.github.com/"):
-        url = url[23:] # trim the "https://api.github.com/" (23 chars)
+        url = url[23:]  # trim the "https://api.github.com/" (23 chars)
     if url.endswith("{/privacy}"):
-        url = url[:-10] # trim last 10 chars
+        url = url[:-10]  # trim last 10 chars
     return url
 
 
@@ -194,6 +203,7 @@ def raw_osrc_data():
 
     # check if user
     user_info = github.get("user")
+
     repos = github.get("user/repos")
     all_languages = {}
     for repo in repos:
@@ -201,11 +211,15 @@ def raw_osrc_data():
         languages_url = repo["languages_url"]
         languages = github.get(trimHTTP(languages_url))
         all_languages[repo_name] = languages
-    events = github.get(trimHTTP(user_info["events_url"]), params={"per_page": 100}) # won't return more than 100 per page
+    events = github.get(trimHTTP(user_info["events_url"]), params={
+                        "per_page": 100})  # won't return more than 100 per page
 
     # user
     osrc_data["user"] = user_info
     name = user_info["name"]
+    osrc_data["login"] = user_info["login"]
+    osrc_data["github_chart"] = "http://ghchart.rshah.org/" + \
+        user_info["login"]
     osrc_data["name"] = name
     split_name = name.split()
     osrc_data["first_name"] = name.split()[0]
@@ -226,27 +240,31 @@ def raw_osrc_data():
     osrc_data["repos"] = repos
     osrc_data["all_languages"] = all_languages
     osrc_data["cumulative_languages"] = cumulative_languages
-    osrc_data["sorted_cumulative_languages"] = sorted(cumulative_languages.items(), key=operator.itemgetter(1), reverse=True)
+    osrc_data["sorted_cumulative_languages"] = sorted(
+        cumulative_languages.items(), key=operator.itemgetter(1), reverse=True)
 
     # events
     osrc_data["events"] = events
 
     # work schedule
     event_dates = []
-    events_vector = [0,0,0,0,0,0,0] # sunday is first
-    events_hours_vector = [0]*24 # initialize list of zeros
+    events_vector = [0, 0, 0, 0, 0, 0, 0]  # sunday is first
+    events_hours_vector = [0]*24  # initialize list of zeros
     latest_repo_contributions = []
     recorded_repos = []
 
-    unique_events = {} # unique events over past received events
+    unique_events = {}  # unique events over past received events
     # make sure each dict has each of the event types
     for event in events:
         unique_events[event["type"]] = 0
-    weekly_unique_events = [unique_events.copy() for i in range(7)] # unique events over each week
-    hourly_unique_events = [unique_events.copy() for i in range(24)] # unique events over each hour
+    weekly_unique_events = [unique_events.copy()
+                            for i in range(7)]  # unique events over each week
+    hourly_unique_events = [unique_events.copy()
+                            for i in range(24)]  # unique events over each hour
     for event in events:
         date_string = event["created_at"]
-        date_obj = datetime.strptime(date_string, "%Y-%m-%dT%H:%M:%SZ") # monday is first
+        date_obj = datetime.strptime(
+            date_string, "%Y-%m-%dT%H:%M:%SZ")  # monday is first
         event_dates.append(date_obj)
 
         # work days vector
@@ -261,17 +279,15 @@ def raw_osrc_data():
         if event["type"] == "PushEvent":
             name = event["repo"]["name"]
             url = "https://github.com/" + name
-            latest_repo_contributions.append( (date_obj, name, url) )
-
+            latest_repo_contributions.append((date_obj, name, url))
 
         unique_events[event["type"]] += 1
         weekly_unique_events[actual_day][event["type"]] += 1
         # start at 2am instead of 12am because the original javascript code starts at 2am for some reason
         hourly_unique_events[(date_obj.hour+2) % 24][event["type"]] += 1
 
-
-    norm = math.sqrt(sum([ v*v for v in events_vector ]))
-    nomralized_events_vector = [ float(v)/norm for v in events_vector ]
+    norm = math.sqrt(sum([v*v for v in events_vector]))
+    nomralized_events_vector = [float(v)/norm for v in events_vector]
 
     osrc_data["event_dates"] = event_dates
     osrc_data["events_vector"] = events_vector
@@ -283,7 +299,8 @@ def raw_osrc_data():
 
     # sort and add latest_repo_contributions
     sorted(latest_repo_contributions, key=operator.itemgetter(0))
-    latest_repo_contributions_copy = latest_repo_contributions[:] # clone array
+    # clone array
+    latest_repo_contributions_copy = latest_repo_contributions[:]
     latest_repo_contributions = []
     recorded_repos = []
     for contribution in latest_repo_contributions_copy:
@@ -295,11 +312,10 @@ def raw_osrc_data():
     osrc_data["rate_limit"] = github.get("rate_limit")
     return osrc_data
 
+
 def is_logged_in():
     return "access_token" in session
 
+
 def is_on_appengine():
     return os.getenv('SERVER_SOFTWARE') and os.getenv('SERVER_SOFTWARE').startswith('Google App Engine/')
-
-
-
